@@ -1,10 +1,10 @@
 #!/bin/bash
 
-# ROS2 Humble Installation and Workspace Setup Script for Ubuntu 24.04
+# ROS2 Jazzy Installation and Workspace Setup Script for Ubuntu 24.04
 # This script sets up a complete ROS2 environment for robot simulation
 
-echo "=== ROS2 Humble Installation and Workspace Setup ==="
-echo "This script will install ROS2 Humble and set up your workspace"
+echo "=== ROS2 Jazzy Installation and Workspace Setup ==="
+echo "This script will install ROS2 Jazzy and set up your workspace"
 echo "Make sure you're running this on WSL2 Ubuntu 24.04"
 
 # Update system
@@ -23,20 +23,20 @@ echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/ros-a
 # Update package list
 sudo apt update
 
-# Install ROS2 Humble Desktop Full
-echo "Installing ROS2 Humble Desktop Full..."
-sudo apt install -y ros-humble-desktop-full
+# Install ROS2 Jazzy Desktop Full
+echo "Installing ROS2 Jazzy Desktop Full..."
+sudo apt install -y ros-jazzy-desktop-full
 
 # Install additional packages for robot simulation
 echo "Installing additional ROS2 packages..."
 sudo apt install -y \
-    ros-humble-gazebo-ros-pkgs \
-    ros-humble-ros2-control \
-    ros-humble-ros2-controllers \
-    ros-humble-joint-state-publisher-gui \
-    ros-humble-robot-state-publisher \
-    ros-humble-xacro \
-    ros-humble-rviz2 \
+    ros-jazzy-gazebo-ros-pkgs \
+    ros-jazzy-ros2-control \
+    ros-jazzy-ros2-controllers \
+    ros-jazzy-joint-state-publisher-gui \
+    ros-jazzy-robot-state-publisher \
+    ros-jazzy-xacro \
+    ros-jazzy-rviz2 \
     python3-colcon-common-extensions \
     python3-rosdep \
     python3-vcstool \
@@ -51,7 +51,7 @@ rosdep update
 
 # Setup environment
 echo "Setting up ROS2 environment..."
-echo "source /opt/ros/humble/setup.bash" >> ~/.bashrc
+echo "source /opt/ros/jazzy/setup.bash" >> ~/.bashrc
 
 # Create workspace
 echo "Creating ROS2 workspace..."
@@ -59,7 +59,7 @@ mkdir -p ~/ros2_ws/src
 cd ~/ros2_ws
 
 # Source ROS2 setup
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 
 # Build workspace
 echo "Building workspace..."
@@ -70,4 +70,4 @@ echo "source ~/ros2_ws/install/setup.bash" >> ~/.bashrc
 
 echo "=== Installation Complete ==="
 echo "Please run 'source ~/.bashrc' or restart your terminal"
-echo "Then you can copy your arm6 package to ~/ros2_ws/src/"
+echo "Then you can copy your arm_urdf package to ~/ros2_ws/src/"

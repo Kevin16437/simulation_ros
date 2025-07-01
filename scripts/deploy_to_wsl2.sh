@@ -14,7 +14,7 @@ NC='\033[0m'
 
 # 获取脚本所在目录
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PROJECT_NAME="arm6_project"
+PROJECT_NAME="arm_urdf_project"
 ROS_WS="$HOME/ros2_ws"
 
 echo -e "${BLUE}脚本目录: $SCRIPT_DIR${NC}"
@@ -55,12 +55,12 @@ setup_workspace() {
         echo -e "${YELLOW}!${NC} 工作空间已存在: $ROS_WS"
     fi
     
-    # 复制arm6包
-    if [ -d "$SCRIPT_DIR/arm6" ]; then
-        cp -r "$SCRIPT_DIR/arm6" "$ROS_WS/src/"
-        echo -e "${GREEN}✓${NC} 复制arm6包到工作空间"
+    # 复制arm_urdf包
+    if [ -d "$SCRIPT_DIR/../arm_urdf" ]; then
+        cp -r "$SCRIPT_DIR/../arm_urdf" "$ROS_WS/src/"
+        echo -e "${GREEN}✓${NC} 复制arm_urdf包到工作空间"
     else
-        echo -e "${RED}✗${NC} 找不到arm6包"
+        echo -e "${RED}✗${NC} 找不到arm_urdf包 at $SCRIPT_DIR/../arm_urdf"
         return 1
     fi
     
@@ -72,7 +72,7 @@ install_dependencies() {
     echo -e "\n${YELLOW}安装依赖包${NC}"
     
     # Source ROS2环境
-    source /opt/ros/humble/setup.bash
+    source /opt/ros/jazzy/setup.bash
     
     cd "$ROS_WS"
     
@@ -84,14 +84,14 @@ install_dependencies() {
         echo -e "${YELLOW}!${NC} rosdep未找到，手动安装关键依赖"
         sudo apt update
         sudo apt install -y \
-            ros-humble-robot-state-publisher \
-            ros-humble-joint-state-publisher-gui \
-            ros-humble-rviz2 \
-            ros-humble-gazebo-ros-pkgs \
-            ros-humble-ros2-control \
-            ros-humble-ros2-controllers \
-            ros-humble-controller-manager \
-            ros-humble-xacro
+            ros-jazzy-robot-state-publisher \
+            ros-jazzy-joint-state-publisher-gui \
+            ros-jazzy-rviz2 \
+            ros-jazzy-gazebo-ros-pkgs \
+            ros-jazzy-ros2-control \
+            ros-jazzy-ros2-controllers \
+            ros-jazzy-controller-manager \
+            ros-jazzy-xacro
     fi
     
     echo -e "${GREEN}✓${NC} 依赖安装完成"
@@ -99,40 +99,40 @@ install_dependencies() {
 
 # 构建包
 build_package() {
-    echo -e "\n${YELLOW}构建arm6包${NC}"
+    echo -e "\n${YELLOW}构建arm_urdf包${NC}"
     
     cd "$ROS_WS"
-    source /opt/ros/humble/setup.bash
+    source /opt/ros/jazzy/setup.bash
     
     # 构建包
-    if colcon build --packages-select arm6 --symlink-install; then
-        echo -e "${GREEN}✓${NC} arm6包构建成功"
+    if colcon build --packages-select arm_urdf --symlink-install; then
+        echo -e "${GREEN}✓${NC} arm_urdf包构建成功"
         return 0
     else
-        echo -e "${RED}✗${NC} arm6包构建失败"
+        echo -e "${RED}✗${NC} arm_urdf包构建失败"
         return 1
     fi
 }
 
 # 测试包
 test_package() {
-    echo -e "\n${YELLOW}测试arm6包${NC}"
+    echo -e "\n${YELLOW}测试arm_urdf包${NC}"
     
     cd "$ROS_WS"
-    source /opt/ros/humble/setup.bash
+    source /opt/ros/jazzy/setup.bash
     source install/setup.bash
     
     # 检查包是否可以找到
-    if ros2 pkg list | grep -q arm6; then
-        echo -e "${GREEN}✓${NC} arm6包可以被ROS2找到"
+    if ros2 pkg list | grep -q arm_urdf; then
+        echo -e "${GREEN}✓${NC} arm_urdf包可以被ROS2找到"
     else
-        echo -e "${RED}✗${NC} arm6包无法被ROS2找到"
+        echo -e "${RED}✗${NC} arm_urdf包无法被ROS2找到"
         return 1
     fi
     
     # 测试launch文件语法
     echo "测试launch文件..."
-    if timeout 5 ros2 launch arm6 display_ros2.launch.py --show-args &>/dev/null; then
+    if timeout 5 ros2 launch arm_urdf display_ros2.launch.py --show-args &>/dev/null; then
         echo -e "${GREEN}✓${NC} display_ros2.launch.py 语法正确"
     else
         echo -e "${YELLOW}!${NC} display_ros2.launch.py 可能有问题（或超时）"
@@ -146,39 +146,18 @@ create_launch_scripts() {
     echo -e "\n${YELLOW}创建启动脚本${NC}"
     
     # 创建RViz启动脚本
-    cat > "$HOME/start_arm6_rviz.sh" << 'EOF'
+    cat > "$HOME/start_arm_urdf_rviz.sh" << 'EOF'
 #!/bin/bash
 cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
+source /opt/ros/jazzy/setup.bash
 source install/setup.bash
-echo "启动ARM6 RViz2可视化..."
-ros2 launch arm6 display_ros2.launch.py
+echo "启动arm_urdf RViz2可视化..."
+ros2 launch arm_urdf display_ros2.launch.py
 EOF
-    chmod +x "$HOME/start_arm6_rviz.sh"
+    chmod +x "$HOME/start_arm_urdf_rviz.sh"
     
-    # 创建Gazebo启动脚本
-    cat > "$HOME/start_arm6_gazebo.sh" << 'EOF'
-#!/bin/bash
-cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-echo "启动ARM6 Gazebo仿真..."
-ros2 launch arm6 gazebo_ros2.launch.py
-EOF
-    chmod +x "$HOME/start_arm6_gazebo.sh"
-    
-    # 创建控制测试脚本
-    cat > "$HOME/test_arm6_control.sh" << 'EOF'
-#!/bin/bash
-cd ~/ros2_ws
-source /opt/ros/humble/setup.bash
-source install/setup.bash
-echo "启动ARM6控制测试..."
-python3 src/arm6/scripts/test_arm_movement.py
-EOF
-    chmod +x "$HOME/test_arm6_control.sh"
-    
-    echo -e "${GREEN}✓${NC} 启动脚本已创建在 $HOME 目录"
+    echo -e "${GREEN}✓${NC} RViz启动脚本 (start_arm_urdf_rviz.sh) 已创建在 $HOME 目录"
+    echo -e "${YELLOW}!${NC} Gazebo和控制测试脚本未创建，因为相关文件不存在。"
 }
 
 # 主函数
@@ -217,18 +196,11 @@ main() {
     echo -e "\n${GREEN}=== 部署完成！ ===${NC}"
     echo -e "\n${BLUE}使用方法：${NC}"
     echo "1. 启动RViz2可视化："
-    echo "   ~/start_arm6_rviz.sh"
-    echo ""
-    echo "2. 启动Gazebo仿真："
-    echo "   ~/start_arm6_gazebo.sh"
-    echo ""
-    echo "3. 测试机械臂控制："
-    echo "   ~/test_arm6_control.sh"
+    echo "   ~/start_arm_urdf_rviz.sh"
     echo ""
     echo -e "${BLUE}手动命令：${NC}"
     echo "cd ~/ros2_ws && source install/setup.bash"
-    echo "ros2 launch arm6 display_ros2.launch.py"
-    echo "ros2 launch arm6 gazebo_ros2.launch.py"
+    echo "ros2 launch arm_urdf display_ros2.launch.py"
     echo ""
     echo -e "${GREEN}项目部署成功！${NC}"
 }

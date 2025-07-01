@@ -1,14 +1,29 @@
-cmake_minimum_required(VERSION 2.8.3)
+cmake_minimum_required(VERSION 3.8)
+project(arm_urdf)
 
-project(arm2.0)
+if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+  add_compile_options(-Wall -Wextra -Wpedantic)
+endif()
 
-find_package(catkin REQUIRED)
+# find dependencies
+find_package(ament_cmake REQUIRED)
+find_package(urdf REQUIRED)
+find_package(xacro REQUIRED)
 
-catkin_package()
+# Install directories
+install(
+  DIRECTORY
+    urdf
+    meshes
+    launch
+    config
+  DESTINATION
+    share/${PROJECT_NAME}/
+)
 
-find_package(roslaunch)
+if(BUILD_TESTING)
+  find_package(ament_lint_auto REQUIRED)
+  ament_lint_auto_find_test_dependencies()
+endif()
 
-foreach(dir config launch meshes urdf)
-	install(DIRECTORY ${dir}/
-		DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/${dir})
-endforeach(dir)
+ament_package()
